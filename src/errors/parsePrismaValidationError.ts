@@ -1,18 +1,38 @@
-// import { Prisma } from '@prisma/client';
-// import { ApiError } from './ApiError';
+// Function to parse Prisma validation error messages
+ const parsePrismaValidationError = (errorMessage: string) => {
+    // Parse missing argument errors
+    const missingFieldsRegex = /Argument `(.+?)` is missing\./g;
+    let match;
+    const missingFields: string[] = [];
+  
+    while ((match = missingFieldsRegex.exec(errorMessage)) !== null) {
+      missingFields.push(match[1]);
+    }
+  
+    // Parse invalid value errors
+    const invalidValueRegex =
+      /Argument `(.+?)`: Invalid value provided. Expected (.+), provided (.+)\./g;
+    const invalidValues: string[] = [];
+  
+    while ((match = invalidValueRegex.exec(errorMessage)) !== null) {
+      const field = match[1];
+      const expectedType = match[2];
+      const providedValue = match[3];
+      invalidValues.push(
+        `${field}: Expected ${expectedType}, provided ${providedValue}`
+      );
+    }
+  
+    const missingFieldsMessage = missingFields.length
+      ? `Missing fields: ${missingFields.join(", ")}`
+      : "";
+    const invalidValuesMessage = invalidValues.length
+      ? `Invalid values: ${invalidValues.join("; ")}`
+      : "";
+  
+    return `${missingFieldsMessage}${
+      missingFieldsMessage && invalidValuesMessage ? "; " : ""
+    }${invalidValuesMessage}`;
+  };
 
-// export const handlePrismaError = (error: any) => {
-//   if (error instanceof Prisma.PrismaClientKnownRequestError) {
-//     // Example: Unique constraint failed
-//     if (error.code === 'P2002') {
-//       const target = (error.meta?.target as string[])?.join(', ') || 'field';
-//       return new ApiError(409, `Duplicate value for: ${target}`);
-//     }
-//     if (error.code === 'P2025') {
-//       return new ApiError(404, 'Record not found');
-//     }
-//   }
-
-//   // Fallback
-//   return new ApiError(500, 'Database error');
-// };
+  export default parsePrismaValidationError

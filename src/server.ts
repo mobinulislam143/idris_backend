@@ -1,10 +1,10 @@
 import app from './app';
 import { config } from 'dotenv';
-import {prisma} from './config/db';
+import prisma from "./shared/prisma";
 
 config();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 
 async function startServer(){
   try{
